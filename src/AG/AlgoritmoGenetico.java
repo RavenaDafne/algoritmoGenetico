@@ -33,7 +33,7 @@ public class AlgoritmoGenetico {
     public static List<Professor> todosProfessores;
     public static List<Sala> todasSalas;
     public static List<Horario> todosHorarios;
-    public static Map<String, List<String>> matriculasAlunos; // Dominio.Aluno ID -> Lista de Disciplinas ID
+    public static Map<String, List<String>> matriculasAlunos; // Lista de Disciplinas ID
 
     // Mapeamentos para busca rápida
     public static Map<String, Disciplina> mapaDisciplinas;
@@ -43,26 +43,25 @@ public class AlgoritmoGenetico {
 
 
     public static void main(String[] args) throws IOException {
-        // Inicializar dados da universidade (Exemplo - você precisará carregar seus dados reais)
+        // Inicializar dados da universidade 
         carregarDadosUniversidadeExemplo();
 
         FileWriter writer = new FileWriter(numeroCromossomos + "_"+ numeroEvolucoes + "_saida_" +".txt",true);
 
         PrintWriter saida = new PrintWriter(writer);
 
-        // Obter instância da classe
         AlgoritmoGenetico ag = AlgoritmoGenetico.getInstancia();
 
         // Criando lista de cromossomos
         ArrayList<Cromossomo> pop = ag.getPopulacao();
 
-        // Início criação da população (randomica)
+        // Criação da população (randomica)
         ag.gerarPopulacao();
 
         // Calcular Fitness dos cromossomos
         ag.definirFitnessScore();
 
-        // Selecao cromossomos (Ordenar decrescente por valor de Fitness)
+        // Selecao cromossomos - Decrescente por valor de Fitness
         ag.selecao();
 
         // Início dos cruzamentos
@@ -71,10 +70,10 @@ public class AlgoritmoGenetico {
             // Cruzamento
             ag.cruzamentos();
 
-            // Calcular Fitness dos cromossomos (recalcula para novos e mutados)
+            // Calcular Fitness  - recalcula para novos e mutados
             ag.definirFitnessScore();
 
-            // Selecao cromossomos (Ordenar decrescente por valor de Fitness)
+            // Selecao cromossomos
             ag.selecao();
 
             System.out.print("\n==================================================");
@@ -89,7 +88,7 @@ public class AlgoritmoGenetico {
             saida.print((i + 1) +"  " +ag.obterFitnessMedio() );
             saida.print("\n");
 
-            // Salvando resultados em arquivo RES
+            // Salvando resultados no arquivo RES
             ag.salvarPopulacaoApta(numeroCromossomos + "_"+ numeroEvolucoes + "_saida_" +".res", (i + 1));
             ag.imprimirPopulacaoApta();
         }
@@ -134,19 +133,13 @@ public class AlgoritmoGenetico {
         ArrayList<Aula> sequencia = new ArrayList<>();
         Random random = new Random();
 
-        // Para cada disciplina, tente atribuir um horário, sala e professor aleatórios
-        // O número de genes (numeroGenes) deve ser igual ao número total de disciplinas OU ao número total de aulas/periodos
-        // Para o problema dado, cada disciplina precisa de uma atribuição, então é o número de disciplinas.
+        // Atribuindo um horário, sala e professor aleatórios
         List<Disciplina> disciplinasNaoAtribuidas = new ArrayList<>(todasDisciplinas);
 
         for (int i = 0; i < numeroGenes; i++) {
-            if (disciplinasNaoAtribuidas.isEmpty()) break; // Todas as disciplinas foram atribuídas
+            if (disciplinasNaoAtribuidas.isEmpty()) break; 
 
             Disciplina disciplina = disciplinasNaoAtribuidas.remove(random.nextInt(disciplinasNaoAtribuidas.size()));
-
-            // Tenta encontrar uma atribuição válida aleatória
-            // Isso pode ser complexo, pois envolve verificar compatibilidades desde o início.
-            // Para simplicidade, faremos uma atribuição aleatória e deixaremos o fitness penalizar as inválidas.
 
             Horario horario = todosHorarios.get(random.nextInt(todosHorarios.size()));
             Sala sala = todasSalas.get(random.nextInt(todasSalas.size()));
@@ -162,79 +155,77 @@ public class AlgoritmoGenetico {
     public void definirFitnessScore(){
 
         for (Cromossomo tempCromossomo : populacao) {
-            // Recalcular fitness apenas se não foi calculado ou se foi alterado por mutação/cruzamento
+            // Recalculando o  fitness:  caso não foi calculado ou se foi alterado por mutação/cruzamento
             if (!tempCromossomo.isFitnessCalculado()) {
                 double fitnessAtual = 100000.0; // Pontuação base alta
 
-                // Estruturas auxiliares para verificar conflitos
-                // Dominio.Horario+Dominio.Sala -> Atribuicoes (para checar sala ocupada)
+                // Verificando os conflitos
+                // Checando se a sala estiver ocupada
                 Map<String, List<Aula>> horarioSalaMap = new HashMap<>();
-                // Dominio.Horario+Dominio.Professor -> Atribuicoes (para checar professor ocupado)
+                // Checando se o professor estiver ocupado
                 Map<String, List<Aula>> horarioProfessorMap = new HashMap<>();
-                // AlunoId -> Horarios (para checar aluno ocupado)
+                // Checando se aluno estiver ocupado
                 Map<String, List<Horario>> alunoHorariosMap = new HashMap<>();
 
-                // Popular mapas auxiliares e verificar algumas restrições rígidas
+                // Povoando e aplicando restrições rígidas
                 for (Aula aula : tempCromossomo.getSequencia()) {
-                    // Verificar se os IDs existem nos dados da universidade
+                    // Os IDs existem nos dados da universidade
                     if (!mapaDisciplinas.containsKey(aula.getDisciplinaId()) ||
                             !mapaHorarios.containsKey(aula.getHorarioId()) ||
                             !mapaSalas.containsKey(aula.getSalaId()) ||
                             !mapaProfessores.containsKey(aula.getProfessorId())) {
-                        fitnessAtual -= 2000; // Penalidade muito alta para atribuição inválida
-                        continue; // Pula para a próxima atribuição
+                        fitnessAtual -= 2000; // Penalidade muito alta 
+                        continue; 
                     }
 
-                    // Obter objetos completos
                     Disciplina disciplina = mapaDisciplinas.get(aula.getDisciplinaId());
                     Horario horario = mapaHorarios.get(aula.getHorarioId());
                     Sala sala = mapaSalas.get(aula.getSalaId());
                     Professor professor = mapaProfessores.get(aula.getProfessorId());
 
 
-                    // Restrições Rígidas - Penalidades Altas
+                    // Penalidades Altas
 
-                    // 1. Conflito de Dominio.Sala (uma sala, um horário)
+                    // 1. Conflito a  sala ocupada
                     String chaveSalaHorario = aula.salaId + "_" + aula.getHorarioId();
                     horarioSalaMap.computeIfAbsent(chaveSalaHorario, k -> new ArrayList<>()).add(aula);
                     if (horarioSalaMap.get(chaveSalaHorario).size() > 1) {
-                        fitnessAtual -= 1000; // Penalidade por sala ocupada
+                        fitnessAtual -= 1000; // Penalidade
                     }
 
-                    // 2. Conflito de Dominio.Professor (um professor, um horário)
+                    // 2. Conflito professor ocupado
                     String chaveProfessorHorario = aula.getProfessorId() + "_" + aula.getHorarioId();
                     horarioProfessorMap.computeIfAbsent(chaveProfessorHorario, k -> new ArrayList<>()).add(aula);
                     if (horarioProfessorMap.get(chaveProfessorHorario).size() > 1) {
-                        fitnessAtual -= 1000; // Penalidade por professor ocupado
+                        fitnessAtual -= 1000; // Penalidade
                     }
 
-                    // 3. Disponibilidade do Dominio.Professor
+                    // 3. Disponibilidade do professor
                     if (!professor.getHorarioDisponiveis().contains(aula.getHorarioId())) {
-                        fitnessAtual -= 1000; // Dominio.Professor não disponível
+                        fitnessAtual -= 1000; //Penalidade
                     }
 
-                    // 4. Capacidade da Dominio.Sala
+                    // 4. Capacidade pequena da Sala
                     if (disciplina.getNumeroAlunosEstimado() > sala.getCapacidade()) {
-                        fitnessAtual -= 1000; // Dominio.Sala muito pequena
+                        fitnessAtual -= 1000; // Penalidade
                     }
 
-                    // 5. Preferência de Dominio.Professor (se a disciplina tem professores preferidos e não é um deles)
+                    // 5. Preferência de professor 
                     if (disciplina.getProfessoresPreferidosIds() != null &&
                             !disciplina.getProfessoresPreferidosIds().isEmpty() &&
                             !disciplina.getProfessoresPreferidosIds().contains(aula.getProfessorId())) {
-                        fitnessAtual -= 200; // Penalidade média para professor não preferido
+                        fitnessAtual -= 200; // Penalidade 
                     }
 
-                    // Restrições Flexíveis - Penalidades Menores
+                    // Penalidades Menores
 
-                    // 6. Preferência de Turno do Dominio.Professor
+                    // 6. Preferência do Turno do Professor
                     if (professor.getPreferenciaTurno() != null && !professor.getPreferenciaTurno().isEmpty() &&
                             !professor.getPreferenciaTurno().equals(horario.getTurno())) {
-                        fitnessAtual -= 50; // Penalidade menor por turno não preferido
+                        fitnessAtual -= 50; // Penalidade 
                     }
 
-                    // 7. Conflitos de Horário para Dominio.Aluno (Lógica mais complexa, pois depende de TODAS as disciplinas do aluno)
-                    // Para cada aluno matriculado nesta disciplina, adicione o horário ao mapa de horários do aluno
+                    // 7. Conflitos de Horário para o aluno matriculado 
                     for (Map.Entry<String, List<String>> entry : matriculasAlunos.entrySet()) {
                         String alunoId = entry.getKey();
                         List<String> disciplinasDoAluno = entry.getValue();
@@ -245,19 +236,17 @@ public class AlgoritmoGenetico {
                         }
                     }
                 }
-
-                // Verificar conflitos de horário para Alunos após popular o mapa
                 for (List<Horario> horariosAluno : alunoHorariosMap.values()) {
                     for (int i = 0; i < horariosAluno.size(); i++) {
                         for (int j = i + 1; j < horariosAluno.size(); j++) {
                             if (horariosAluno.get(i).sobrepoe(horariosAluno.get(j))) {
-                                fitnessAtual -= 500; // Penalidade por conflito de aluno
+                                fitnessAtual -= 500; // Penalidade 
                             }
                         }
                     }
                 }
 
-                // Garantir que o fitness não seja negativo
+                // fitness não será negativo
                 if (fitnessAtual < 0) {
                     fitnessAtual = 0;
                 }
@@ -268,16 +257,13 @@ public class AlgoritmoGenetico {
 
     public void selecao() {
 
-        Collections.sort (populacao, new CompararCromosso(false)); // False para decrescente (maior fitness = melhor)
+        Collections.sort (populacao, new CompararCromosso(false)); // Será falso  pois queremos um fitness decrescente
 
         int percentual = 100;
-
-        // Atribuir percentual de seleção (para seleção tipo roleta)
         for (Cromossomo tempCromossomo : populacao) {
             tempCromossomo.setPosicao(populacao.indexOf(tempCromossomo));
 
-            // Lógica de percentual pode ser ajustada para sua necessidade
-            percentual = percentual - 10; // Exemplo de decaimento
+            percentual = percentual - 10; //Decaimento
             if (percentual < 10){
                 percentual = 5; // Mínimo
             }
@@ -291,10 +277,9 @@ public class AlgoritmoGenetico {
 
         int paiIndex, maeIndex;
 
-        // Clonar a população atual para evitar ConcurrentModificationException
-        // e permitir que novos filhos sejam adicionados sem interferir na seleção de pais da geração atual.
+        // Clonando a população atual para evitar alterações em tempo de cruzamento(Exceções)
         ArrayList<Cromossomo> novaPopulacao = new ArrayList<>();
-        // Adiciona os cromossomos mais aptos da geração atual à nova população para elitismo
+        // Cromossomos mais aptos adicionados a  nova população para o elitismo
         for(int i = 0; i < numeroCromossomosAptos; i++) {
             novaPopulacao.add(populacao.get(i));
         }
@@ -302,7 +287,7 @@ public class AlgoritmoGenetico {
 
         for (int i = 0; i < (numeroCromossomos - numeroCromossomosAptos) / 2; i++) { // Gerar novos filhos para preencher o resto da população
 
-            // Pegando 2 pais aleatoriamente (usando seleção por percentual/roleta)
+            // Pegando 2 pais aleatoriamente : seleção por roleta
             paiIndex = obterPai();
             maeIndex = obterMae(paiIndex);
 
@@ -314,15 +299,13 @@ public class AlgoritmoGenetico {
             Cromossomo cromossomoFilho02;
 
             // Realiza o cruzamento
-            // PMX (Partially Mapped Crossover) é uma boa opção para problemas de permutação (como este onde disciplinas precisam ser únicas)
-            // ou Order Crossover. A lógica abaixo é uma adaptação de PMX/Order.
+            // Crossover / permutação
             ArrayList<ArrayList<Aula>> filhosGerados = realizarCruzamento(cromossomoPai.getSequencia(), cromossomoMae.getSequencia());
             cromossomoFilho01 = new Cromossomo();
             cromossomoFilho01.setSequencia(filhosGerados.get(0));
             cromossomoFilho02 = new Cromossomo();
             cromossomoFilho02.setSequencia(filhosGerados.get(1));
 
-            // Aplica mutação
             if (ocorreuMutacao()) {
                 cromossomoFilho01 = obterMutante(cromossomoFilho01);
                 numeroMutantes++;
@@ -332,7 +315,7 @@ public class AlgoritmoGenetico {
                 numeroMutantes++;
             }
 
-            // Marca fitness como não calculado para que seja reavaliado
+            // fitness reavaliado
             cromossomoFilho01.setFitnessCalculado(false);
             cromossomoFilho02.setFitnessCalculado(false);
 
@@ -344,23 +327,23 @@ public class AlgoritmoGenetico {
     }
 
     public int obterPai() {
-        // Implementação da seleção por roleta
+        //seleção 
         Random rand = new Random();
         int totalPercentual = populacao.stream().limit(numeroCromossomosAptos).mapToInt(Cromossomo::getPercentual).sum();
-        int roletaSpin = rand.nextInt(totalPercentual) + 1; // 1 a totalPercentual
+        int roletaSpin = rand.nextInt(totalPercentual) + 1; 
 
         int acumulado = 0;
         for (int i = 0; i < numeroCromossomosAptos; i++) {
             acumulado += populacao.get(i).getPercentual();
             if (roletaSpin <= acumulado) {
-                return i; // Retorna o índice do pai selecionado
+                return i; // índice do pai selecionado
             }
         }
-        return 0; // Fallback, deve sempre retornar um pai válido
+        return 0; // pai válido
     }
 
     public int obterMae(int paiIndex) {
-        // Implementação da seleção por roleta, garantindo que a mãe não seja o pai (ou que seja diferente o suficiente)
+        // a mãe não pode ser o pai / diferente o suficiente
         Random rand = new Random();
         int maeIndex;
         do {
@@ -376,21 +359,20 @@ public class AlgoritmoGenetico {
                     break;
                 }
             }
-        } while (maeIndex == paiIndex && numeroCromossomosAptos > 1); // Evita pegar o mesmo pai se houver outras opções
+        } while (maeIndex == paiIndex && numeroCromossomosAptos > 1); // !=pai 
 
         return maeIndex;
     }
 
-    // Adaptação para o Cruzamento (PMX - Partially Mapped Crossover)
     public ArrayList<ArrayList<Aula>> realizarCruzamento(ArrayList<Aula> sequenciaPai, ArrayList<Aula> sequenciaMae) {
         Random random = new Random();
         int tamanho = sequenciaPai.size();
 
-        // Cópia das sequências originais para modificação
+        // Copiando: seq. originais para modificação
         ArrayList<Aula> filho1 = new ArrayList<>(Collections.nCopies(tamanho, (Aula) null));
         ArrayList<Aula> filho2 = new ArrayList<>(Collections.nCopies(tamanho, (Aula) null));
 
-        // Escolha de dois pontos de corte aleatórios
+        // 2 pontos de corte aleatórios
         int pontoCorte1 = random.nextInt(tamanho);
         int pontoCorte2 = random.nextInt(tamanho);
 
@@ -399,35 +381,24 @@ public class AlgoritmoGenetico {
             pontoCorte1 = pontoCorte2;
             pontoCorte2 = temp;
         }
-
-        // 1. Copia o segmento entre os pontos de corte diretamente
         for (int i = pontoCorte1; i < pontoCorte2; i++) {
             filho1.set(i, sequenciaPai.get(i));
             filho2.set(i, sequenciaMae.get(i));
         }
 
-        // 2. Preenche o restante dos filhos, lidando com mapeamentos
         for (int i = 0; i < tamanho; i++) {
-            if (i < pontoCorte1 || i >= pontoCorte2) { // Fora do segmento copiado
-                // Para filho1, preenche com gene da mae, respeitando mapeamento
+            if (i < pontoCorte1 || i >= pontoCorte2) { 
                 Aula geneMae = sequenciaMae.get(i);
-                if (!filho1.contains(geneMae)) { // Se o gene da mae não está no filho1
+                if (!filho1.contains(geneMae)) { // gene da mae não está no filho1
                     filho1.set(i, geneMae);
                 } else {
-                    // Encontrar o mapeamento para o gene duplicado
+                    // Mapeando para o gene duplicado
                     Aula mapeado = geneMae;
                     while (filho1.contains(mapeado)) {
                         int index = sequenciaPai.indexOf(mapeado);
                         if (index == -1 || (index >= pontoCorte1 && index < pontoCorte2)) {
-                            // Se o gene não está no pai ou está no segmento copiado,
-                            // precisamos encontrar um gene único para preencher.
-                            // Isso é a parte mais complexa: encontrar uma atribuição válida
-                            // que não esteja duplicada e preencha um slot vazio.
-                            // Por simplicidade aqui, podemos pegar o gene de outro local do pai
-                            // ou gerar um novo se necessário, mas o PMX original teria um mapeamento direto.
-                            // Para agendamento, o reparo final após o cruzamento pode ser mais prático.
-                            mapeado = encontrarGeneUnicoParaPreencher(filho1, sequenciaMae, random); // Função auxiliar complexa
-                            if(mapeado == null) { // Fallback se não encontrar
+                            mapeado = encontrarGeneUnicoParaPreencher(filho1, sequenciaMae, random); 
+                            if(mapeado == null) { 
                                 mapeado = gerarAtribuicaoAulaAleatoriaValida();
                             }
                         } else {
@@ -437,7 +408,6 @@ public class AlgoritmoGenetico {
                     filho1.set(i, mapeado);
                 }
 
-                // Para filho2, preenche com gene do pai, respeitando mapeamento
                 Aula genePai = sequenciaPai.get(i);
                 if (!filho2.contains(genePai)) {
                     filho2.set(i, genePai);
@@ -459,8 +429,7 @@ public class AlgoritmoGenetico {
             }
         }
 
-        // Reparo adicional pós-cruzamento: Garantir que todas as disciplinas estejam presentes e não duplicadas.
-        // Isso é crucial, pois o PMX simples para sequências de itens únicos não é perfeito para AtribuicaoAula.
+        //Garantindo que todas as disciplinas estejam presentes e não duplicadas.
         repararCromossomo(filho1);
         repararCromossomo(filho2);
 
@@ -470,14 +439,13 @@ public class AlgoritmoGenetico {
         return filhos;
     }
 
-    // Método auxiliar para reparo (muito importante)
     private void repararCromossomo(ArrayList<Aula> sequencia) {
         Set<String> disciplinasPresentes = new HashSet<>();
         ArrayList<Aula> duplicatas = new ArrayList<>();
 
-        // Identificar disciplinas duplicadas e faltantes
+        // Identificando as disciplinas duplicadas e faltantes
         for (Aula atribuicao : sequencia) {
-            if (atribuicao != null) { // Pode haver nulos se o inicializarCromossomo for deficiente
+            if (atribuicao != null) { 
                 if (disciplinasPresentes.contains(atribuicao.getDisciplinaId())) {
                     duplicatas.add(atribuicao);
                 } else {
@@ -490,75 +458,65 @@ public class AlgoritmoGenetico {
                 .filter(d -> !disciplinasPresentes.contains(d.getId()))
                 .collect(Collectors.toList());
 
-        // Substituir duplicatas por disciplinas faltantes
+        // Substituindo duplicatas por disciplinas que faltam
         Random random = new Random();
         for (Aula dup : duplicatas) {
             if (!disciplinasFaltantes.isEmpty()) {
-                Disciplina disciplinaFaltante = disciplinasFaltantes.remove(0); // Pega a primeira faltante
-                // Crie uma nova atribuição para a disciplina faltante, talvez copiando os outros atributos da duplicata
-                // Ou gerando novos aleatoriamente (e verificando validade)
+                Disciplina disciplinaFaltante = disciplinasFaltantes.remove(0); 
                 Horario horario = todosHorarios.get(random.nextInt(todosHorarios.size()));
                 Sala sala = todasSalas.get(random.nextInt(todasSalas.size()));
                 Professor professor = todosProfessores.get(random.nextInt(todosProfessores.size()));
 
                 Aula novaAtribuicao = new Aula(disciplinaFaltante.getId(), horario.getId(), sala.getId(), professor.getId());
 
-                // Encontre a posição da duplicata e substitua
+                // A posição da disciplina repetida e e substitua
                 int index = sequencia.indexOf(dup);
                 if (index != -1) {
                     sequencia.set(index, novaAtribuicao);
                     disciplinasPresentes.add(disciplinaFaltante.getId());
                 }
             } else {
-                // Se não há mais disciplinas faltantes, apenas remova a duplicata ou a torne nula
                 int index = sequencia.indexOf(dup);
                 if (index != -1) {
-                    sequencia.set(index, null); // Marca para ser preenchido por mutação ou descartado
+                    sequencia.set(index, null); // Selecionado para a mutação ou descartado
                 }
             }
         }
 
-        // Adicionar quaisquer disciplinas que ainda estejam faltando (se o tamanho da sequência for menor que numeroGenes)
-        // Isso pode acontecer se houver muitos nulos ou remoções.
+        // Adicionando disciplinas que faltam 
         while (sequencia.size() < numeroGenes && !disciplinasFaltantes.isEmpty()) {
             Disciplina disciplinaFaltante = disciplinasFaltantes.remove(0);
-            sequencia.add(gerarAtribuicaoAulaAleatoriaValida(disciplinaFaltante.getId())); // Cria nova atribuição válida
+            sequencia.add(gerarAtribuicaoAulaAleatoriaValida(disciplinaFaltante.getId())); 
         }
-        // Se a sequência ficou com menos genes do que o esperado (por exemplo, após remover duplicatas e não conseguir repor)
-        // ou se ainda houver nulos, preencher
+        // Se a seq. ficou com menos genes do que o esperado nulos, preencher
         for (int i = 0; i < sequencia.size(); i++) {
             if (sequencia.get(i) == null) {
                 Disciplina disciplinaParaAtribuir = disciplinasFaltantes.isEmpty() ? null : disciplinasFaltantes.remove(0);
                 if (disciplinaParaAtribuir != null) {
                     sequencia.set(i, gerarAtribuicaoAulaAleatoriaValida(disciplinaParaAtribuir.getId()));
                 } else {
-                    // Se não há mais disciplinas faltantes, remover o null ou preencher com algo genérico
                     sequencia.remove(i);
-                    i--; // Ajusta o índice
+                    i--;
                 }
             }
         }
-        // Ajusta o tamanho final da sequência para numeroGenes
+        // Ajustando o tamanho final da sequência 
         while(sequencia.size() > numeroGenes) {
             sequencia.remove(sequencia.size() - 1);
         }
         while(sequencia.size() < numeroGenes) {
-            sequencia.add(gerarAtribuicaoAulaAleatoriaValida(null)); // Gera para qualquer disciplina que precise
+            sequencia.add(gerarAtribuicaoAulaAleatoriaValida(null)); // Gerando qualquer disciplina que precise
         }
     }
 
-    // Auxiliar para cruzamento PMX - encontra um gene que não está em 'filho'
     private Aula encontrarGeneUnicoParaPreencher(ArrayList<Aula> filho, ArrayList<Aula> sourceSequence, Random random) {
-        // Tenta encontrar um gene da sequência de origem que ainda não esteja no filho
+        // Encontra um gene da seq. de origem que ainda não esteja no filho
         for (Aula gene : sourceSequence) {
             if (!filho.contains(gene)) {
                 return gene;
             }
         }
-        // Se todos os genes da sequência de origem já estão no filho,
-        // isso significa que precisamos de uma atribuição totalmente nova
-        // para uma disciplina que está faltando.
-        return gerarAtribuicaoAulaAleatoriaValida(); // Gerar uma atribuição válida completamente nova
+        return gerarAtribuicaoAulaAleatoriaValida(); // Gerando uma tupla válida completamente nova
     }
 
 
@@ -580,12 +538,12 @@ public class AlgoritmoGenetico {
                 novaAtribuicao = new Aula(atribuicaoParaMutar.getDisciplinaId(), novoIdHorario,
                         atribuicaoParaMutar.getSalaId(), atribuicaoParaMutar.getProfessorId());
                 break;
-            case 1: // Mutar Dominio.Sala
+            case 1: // Mutar Sala
                 String novoIdSala = todasSalas.get(random.nextInt(todasSalas.size())).getId();
                 novaAtribuicao = new Aula(atribuicaoParaMutar.getDisciplinaId(), atribuicaoParaMutar.getHorarioId(),
                         novoIdSala, atribuicaoParaMutar.getProfessorId());
                 break;
-            case 2: // Mutar Dominio.Professor
+            case 2: // Mutar Professor
                 String novoIdProfessor = todosProfessores.get(random.nextInt(todosProfessores.size())).getId();
                 novaAtribuicao = new Aula(atribuicaoParaMutar.getDisciplinaId(), atribuicaoParaMutar.getHorarioId(),
                         atribuicaoParaMutar.getSalaId(), novoIdProfessor);
@@ -641,10 +599,6 @@ public class AlgoritmoGenetico {
         }
     }
 
-    // ====================================================================================
-    // Métodos Auxiliares para Carregar Dados da Universidade (Apenas para Exemplo!)
-    // Você precisará substituir isso com sua própria lógica de carregamento de dados.
-    // ====================================================================================
     private static void carregarDadosUniversidadeExemplo() {
         todasDisciplinas = new ArrayList<>();
         todosProfessores = new ArrayList<>();
@@ -652,7 +606,6 @@ public class AlgoritmoGenetico {
         todosHorarios = new ArrayList<>();
         matriculasAlunos = new HashMap<>();
 
-        // Exemplo de Disciplinas
         todasDisciplinas.add(new Disciplina("COMP101", "Introdução à Programação", 30, List.of("PROF_A", "PROF_B")));
         todasDisciplinas.add(new Disciplina("MAT201", "Cálculo I", 40, List.of("PROF_C")));
         todasDisciplinas.add(new Disciplina("FIS101", "Física Básica", 25, List.of("PROF_D", "PROF_E")));
@@ -664,8 +617,6 @@ public class AlgoritmoGenetico {
         todasDisciplinas.add(new Disciplina("QUIM201", "Química Orgânica", 20, List.of("PROF_E")));
         todasDisciplinas.add(new Disciplina("ARQ101", "Desenho Arquitetônico", 15, List.of("PROF_F")));
 
-
-        // Exemplo de Professores
         todosProfessores.add(new Professor("PROF_A", "Prof. Ana", Set.of("SEG_8-10AM", "QUA_10-12PM", "SEX_8-10AM"), "Manha"));
         todosProfessores.add(new Professor("PROF_B", "Prof. Bruno", Set.of("SEG_10-12PM", "QUA_14-16PM", "SEX_10-12PM"), "Tarde"));
         todosProfessores.add(new Professor("PROF_C", "Prof. Carlos", Set.of("TER_8-10AM", "QUI_10-12PM", "TER_14-16PM"), "Manha"));
@@ -673,15 +624,11 @@ public class AlgoritmoGenetico {
         todosProfessores.add(new Professor("PROF_E", "Prof. Eduardo", Set.of("TER_10-12PM", "QUI_8-10AM", "SEX_14-16PM"), "Manha"));
         todosProfessores.add(new Professor("PROF_F", "Prof. Fatima", Set.of("SEG_8-10AM", "TER_10-12PM", "QUA_14-16PM"), "Noite"));
 
-
-        // Exemplo de Salas
         todasSalas.add(new Sala("SALA_A101", "Lab. Info 1", 30, Set.of("SEG_8-10AM", "SEG_10-12PM", "TER_8-10AM", "TER_10-12PM", "QUA_8-10AM", "QUA_10-12PM")));
         todasSalas.add(new Sala("SALA_A102", "Auditorio", 50, Set.of("SEG_8-10AM", "SEG_14-16PM", "TER_8-10AM", "TER_14-16PM", "QUI_8-10AM", "QUI_14-16PM")));
         todasSalas.add(new Sala("SALA_B201", "Dominio.Sala de Dominio.Aula 1", 25, Set.of("SEG_10-12PM", "SEG_14-16PM", "QUA_10-12PM", "QUA_14-16PM", "SEX_10-12PM", "SEX_14-16PM")));
         todasSalas.add(new Sala("SALA_B202", "Dominio.Sala de Dominio.Aula 2", 35, Set.of("TER_8-10AM", "TER_10-12PM", "QUI_8-10AM", "QUI_10-12PM", "SEX_8-10AM", "SEX_10-12PM")));
 
-
-        // Exemplo de Horários
         todosHorarios.add(new Horario("SEG_8-10AM", "Segunda", "08:00", "10:00", "Manha"));
         todosHorarios.add(new Horario("SEG_10-12PM", "Segunda", "10:00", "12:00", "Manha"));
         todosHorarios.add(new Horario("SEG_14-16PM", "Segunda", "14:00", "16:00", "Tarde"));
@@ -698,23 +645,15 @@ public class AlgoritmoGenetico {
         todosHorarios.add(new Horario("SEX_10-12PM", "Sexta", "10:00", "12:00", "Manha"));
         todosHorarios.add(new Horario("SEX_14-16PM", "Sexta", "14:00", "16:00", "Tarde"));
 
-
-        // Exemplo de Matrículas de Alunos
-        // Dominio.Aluno 1 matriculado em COMP101, MAT201
         matriculasAlunos.put("ALUNO_001", List.of("COMP101", "MAT201"));
-        // Dominio.Aluno 2 matriculado em COMP101, FIS101
         matriculasAlunos.put("ALUNO_002", List.of("COMP101", "FIS101"));
-        // Dominio.Aluno 3 matriculado em MAT201, LIT301
         matriculasAlunos.put("ALUNO_003", List.of("MAT201", "LIT301"));
-        // Dominio.Aluno 4 matriculado em COMP101, COMP202
         matriculasAlunos.put("ALUNO_004", List.of("COMP101", "COMP202"));
-        // Dominio.Aluno 5 matriculado em FIS101, BIO101
         matriculasAlunos.put("ALUNO_005", List.of("FIS101", "BIO101"));
-        // Dominio.Aluno 6 matriculado em MAT201, MAT302
         matriculasAlunos.put("ALUNO_006", List.of("MAT201", "MAT302"));
 
 
-        // Preencher mapas para acesso rápido
+        // Povoando os mapas
         mapaDisciplinas = todasDisciplinas.stream().collect(Collectors.toMap(Disciplina::getId, d -> d));
         mapaProfessores = todosProfessores.stream().collect(Collectors.toMap(Professor::getId, p -> p));
         mapaSalas = todasSalas.stream().collect(Collectors.toMap(Sala::getId, s -> s));
@@ -724,7 +663,7 @@ public class AlgoritmoGenetico {
         numeroGenes = todasDisciplinas.size();
     }
 
-    // Método auxiliar para gerar uma atribuição aula aleatória e válida (dentro das possibilidades)
+    // Gerando uma tupla de aula aleatória e válida (dentro das possibilidades)
     private Aula gerarAtribuicaoAulaAleatoriaValida() {
         Random random = new Random();
         Disciplina disciplina = todasDisciplinas.get(random.nextInt(todasDisciplinas.size()));
@@ -739,7 +678,7 @@ public class AlgoritmoGenetico {
         Sala sala = todasSalas.get(random.nextInt(todasSalas.size()));
         Professor professor = todosProfessores.get(random.nextInt(todosProfessores.size()));
 
-        // Verificar se professor está disponível no horário escolhido
+        // Verificando se professor está disponível no horário escolhido
         int tentativas = 0;
         while (!professor.getHorarioDisponiveis().contains(horario.getId()) && tentativas < 100) {
             professor = todosProfessores.get(random.nextInt(todosProfessores.size()));
@@ -747,7 +686,7 @@ public class AlgoritmoGenetico {
             tentativas++;
         }
         tentativas = 0;
-        // Verificar se sala está disponível no horário escolhido
+        // Verificando se sala está disponível no horário escolhido
         while (!sala.getHorarioDisponiveisId().contains(horario.getId()) && tentativas < 100) {
             sala = todasSalas.get(random.nextInt(todasSalas.size()));
             horario = todosHorarios.get(random.nextInt(todosHorarios.size())); // Tenta um novo horário também
