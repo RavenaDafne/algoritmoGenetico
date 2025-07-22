@@ -17,7 +17,7 @@ public class AlgoritmoGenetico {
 
     // Parâmetros do Algoritmo Genético
     public static int numeroGenes = 100; // Número de disciplinas a serem agendadas
-    public static int numeroCromossomos = 40; // Tamanho inicial da população
+    public static int numeroCromossomos = 50; // Tamanho inicial da população
     public static int numeroCromossomosAptos = 10; // Cromossomos mais aptos para reprodução (deve ser par e > 2)
     public static int numeroEvolucoes = 1000; // Número de gerações
     public static float taxaMortalidade = (float)0.1; // Taxa de mortalidade
