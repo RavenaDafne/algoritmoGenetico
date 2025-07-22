@@ -60,7 +60,7 @@ A seleção por roleta é um método proporcional à aptidão onde cromossomos c
 
 1.  **Pontos de Corte:** Dois pontos de corte aleatórios são selecionados na sequência de aulas dos pais. Isso divide cada cromossomo em três segmentos: pré-corte, entre cortes e pós-corte.
 2.  **Segmento Central:** O segmento central (entre os pontos de corte) de cada pai é copiado diretamente para o filho correspondente. Por exemplo, o segmento central do Pai 1 vai para o Filho 1, e o do Pai 2 vai para o Filho 2.
-3.  **Mapeamento e Preenchimento:** Para os segmentos fora dos pontos de corte, a lógica do PMX é aplicada:
+3.  **Mapeamento e Preenchimento:** Para os segmentos fora dos pontos de corte, a lógica é aplicada:
     * É criado um mapeamento entre os genes (aulas) presentes no segmento central do Pai 1 e os genes correspondentes no segmento central do Pai 2.
     * Para preencher as posições restantes no Filho 1, percorre-se a sequência do Pai 2. Se uma aula do Pai 2 já estiver presente no segmento central do Filho 1, a aula correspondente no mapeamento é usada. Se a aula mapeada também já estiver no Filho 1, o processo de mapeamento continua até encontrar uma aula que não esteja presente ou até que uma nova aula aleatória válida precise ser gerada.
     * O mesmo processo é aplicado para preencher o Filho 2 usando a sequência do Pai 1.
