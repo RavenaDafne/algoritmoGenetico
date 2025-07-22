@@ -110,9 +110,37 @@ Além da saída no console, serão gerados arquivos:
 * `[numeroCromossomos]_[numeroEvolucoes]_saida_.txt`: Contém o grau médio de fitness por geração, útil para análises de convergência.
 * `[numeroCromossomos]_[numeroEvolucoes]_saida_.res`: Salva os cromossomos mais aptos de cada geração, mostrando sua posição, fitness, percentual de seleção e a sequência de aulas.
 
-## 📈 Gráfico de Convergência do Fitness Médio
+---
+
+## 📈 Gráficos de Convergência do Fitness Médio
+
+### Comparação por Tamanho de População
+
+Este gráfico ilustra a evolução do fitness médio da população ao longo das gerações para diferentes tamanhos de população, mantendo outros parâmetros constantes.
 
 ![Convergência do Algoritmo Genético para Diferentes Tamanhos de População](convergencia_populacao.png)
+
+*Inferências sobre os Dados de População:*
+* **Qualidade da Solução:** Populações maiores (1000 e 2000) geralmente atingem um fitness médio final mais alto, indicando soluções de melhor qualidade devido à maior diversidade genética e exploração do espaço de busca.
+* **Velocidade de Convergência:** Populações menores (50 e 100) tendem a convergir mais rapidamente (em menos gerações), mas podem se estabilizar em um fitness inferior, pois são mais propensas a ótimos locais.
+* **Trade-off:** O gráfico demonstra o trade-off entre a qualidade da solução (favorecida por populações maiores) e o tempo computacional (favorecido por populações menores).
+
+---
+
+### Comparação por Taxa de Mutação
+
+Para entender o impacto da **taxa de mutação** (`taxaMutabilidade`), realizamos experimentos variando-a (0.01%, 0.05%, 0.1%, 0.3%, 0.5% e 0.8%) enquanto mantivemos o tamanho da população (ex: 50 cromossomos) e o número de gerações (1000) constantes.
+
+O gráfico a seguir ilustra a convergência do fitness médio para cada uma dessas configurações de mutação:
+
+![Convergência do Algoritmo Genético para Diferentes Taxas de Mutação](convergencia_mutacao.png)
+
+*Inferências sobre os Dados de Mutação:*
+* **Exploração vs. Explotação:** Taxas de mutação mais altas (ex: 0.5, 0.8) tendem a aumentar a **exploração** do espaço de busca, introduzindo mais diversidade e ajudando a evitar ótimos locais. No gráfico, isso pode resultar em curvas mais irregulares ou na capacidade de alcançar um fitness mais alto a longo prazo. No entanto, se for muito alta, pode impedir a convergência ou tornar a busca muito aleatória.
+* **Refinamento da Solução:** Taxas de mutação mais baixas (ex: 0.01, 0.05) focam na **explotação** (refinamento de soluções existentes), levando a uma convergência mais suave, mas com o risco de ficar presa em ótimos locais subótimos. O gráfico pode mostrar essas curvas estabilizando-se mais cedo em um fitness potencialmente mais baixo.
+* **Ponto Ideal:** Geralmente, existe um "ponto ideal" (sweet spot) para a taxa de mutação (muitas vezes em valores moderados como 0.1 ou 0.3) onde há um equilíbrio entre a capacidade de explorar novas soluções e refinar as existentes, levando a um bom fitness final.
+
+---
 
 ## 💡 Futuras Melhorias
 
