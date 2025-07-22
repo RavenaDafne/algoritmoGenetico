@@ -144,7 +144,7 @@ O gráfico a seguir ilustra a convergência do fitness médio para cada uma dess
 
 ## 💡 Futuras Melhorias
 
-* **Entrada de Dados Reais:** Implementar a leitura de dados de disciplinas, professores, salas e alunos de arquivos (CSV, JSON, XML) ou um banco de dados, em vez de dados de exemplo hardcoded.
+* **Entrada de Dados Reais:** Implementar a leitura de dados de disciplinas, professores, salas e alunos de arquivos (CSV, JSON, XML) ou um banco de dados, em vez de dados como exemplo.
 * **Tipos de Cruzamento e Mutação:** Explorar outros operadores genéticos (e.g., Uniform Crossover, Swap Mutation) e comparar seu desempenho.
 * **Visualização de Resultados:** Desenvolver uma interface gráfica (GUI) para visualizar os horários gerados e o progresso do algoritmo.
 * **Métricas de Desempenho:** Adicionar métricas mais detalhadas para avaliar a qualidade das soluções e a eficiência do algoritmo (tempo de execução, número de violações, etc.).
