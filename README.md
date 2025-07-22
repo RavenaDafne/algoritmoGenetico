@@ -110,6 +110,10 @@ Além da saída no console, serão gerados arquivos:
 * `[numeroCromossomos]_[numeroEvolucoes]_saida_.txt`: Contém o grau médio de fitness por geração, útil para análises de convergência.
 * `[numeroCromossomos]_[numeroEvolucoes]_saida_.res`: Salva os cromossomos mais aptos de cada geração, mostrando sua posição, fitness, percentual de seleção e a sequência de aulas.
 
+## 📈 Gráfico de Convergência do Fitness Médio
+
+![Convergência do Algoritmo Genético para Diferentes Tamanhos de População](convergencia_populacao.png)
+
 ## 💡 Futuras Melhorias
 
 * **Entrada de Dados Reais:** Implementar a leitura de dados de disciplinas, professores, salas e alunos de arquivos (CSV, JSON, XML) ou um banco de dados, em vez de dados de exemplo hardcoded.
